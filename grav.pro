@@ -5,11 +5,11 @@ greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
 HEADERS += \
     window.h \
-    renderarea.h \
-    bodyclass.h
+    bodyclass.h \
+    mygraphicsscene.h
 
 SOURCES += \
     window.cpp \
     main.cpp \
-    renderarea.cpp \
-    bodyclass.cpp
+    bodyclass.cpp \
+    mygraphicsscene.cpp

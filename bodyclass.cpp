@@ -5,28 +5,46 @@
 #include <vector>
 #include <fstream>
 #include <cmath>
-using namespace std;
+//using namespace std;
 
-class BodyClass : public BodyClass
+/* class BodyClass : public QGraphicsItem
 {
     public:
         BodyClass(float initial_x, float initial_y, float initial_xv, float initial_yv, float initial_mass);
-        ~BodyClass();
         void ChangePos(float, float);
         void AddVel(float, float);
         pair<float, float> GetPos();
         float pos_x, pos_y, xv, yv, mass;
-};
+    protected:
+        void advance(int phase);+
+    private:
+
+}; */
 BodyClass::BodyClass(float initial_x, float initial_y, float initial_xv, float initial_yv, float initial_mass)
 {
-    //void changepos(int, int);
     this->pos_x = initial_x;
     this->pos_y = initial_y;
     this->xv = initial_xv;
     this->yv = initial_yv;
     this->mass = initial_mass;
-    cout << "constructed a body at " << this->pos_x << "," << this->pos_y << endl;
+    setPos(mapToParent(this->pos_x, this->pos_y));
+    this->setVisible(true);
+
+    //cout << "constructed a body at " << this->pos_x << "," << this->pos_y << endl;
 }
+QRectF BodyClass::boundingRect() const
+{
+    return QRect(0,0,5,5);
+}
+
+void BodyClass::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget)
+{
+    QPen pen(Qt::white, 5);
+    QRectF rect = boundingRect();
+    painter->setPen(pen);
+    painter->drawEllipse(rect);
+}
+
 void BodyClass::ChangePos(float new_x, float new_y)
 {
     this->pos_x += new_x;
@@ -37,32 +55,31 @@ void BodyClass::AddVel(float new_xv, float new_yv)
     this->xv += new_xv;
     this->yv += new_yv;
 }
-pair<float, float> BodyClass::GetPos()
+void BodyClass::advance(int phase)
 {
-    return make_pair(this->pos_x, this->pos_y);
-}
-float distance(pair<float, float> body1, pair<float, float> body2)
-{
-    return sqrt(pow((body1.first-body2.first),2) + pow((body1.second-body2.second),2));
-}
-float distance_soft(pair<float, float> body1, pair<float, float> body2)
-{
-    return (sqrt(pow((body1.first-body2.first),2) + pow((body1.second-body2.second),2)) + 0.01);
-}
-void simulate(vector<BodyClass>& bodies)
-{
-    float G = 0.00000005;
-    for (int i=0; i<bodies.size(); i++)
+    if (!phase)
+        return;
+    QGraphicsScene *parentScene = this->scene();
+    this->setVisible(false);
+    QList<QGraphicsItem *> bodies = parentScene->items();
+    for (int i = 0; i < bodies.size(); i++)
     {
-        for (int j=0; j<bodies.size(); j++)
+        if (bodies[i]->isVisible())
         {
-            if (i!=j)
-            {
-               float dist = distance_soft(bodies[i].GetPos(), bodies[j].GetPos());
-                // dv = a*t = F*t/m
-                bodies[i].AddVel( (G * bodies[i].mass / pow(dist, 2)*(bodies[j].pos_x - bodies[i].pos_x))   ,   (G * bodies[i].mass / pow(dist, 2)*(bodies[j].pos_y - bodies[i].pos_y)));
-            }
+            // dis is wher we physics
+            float G = 1e-5;
+            float x1 = this->pos_x;
+            float y1 = this->pos_y;
+            float x2 = bodies[i]->x();
+            float y2 = bodies[i]->y();
+            float dist = sqrt(pow((x1-x2),2) + pow((y1-y2),2)) + 1.0;
+            this->AddVel((G * this->mass / pow(dist, 2)*(x2 - x1)) , (G * this->mass / pow(dist, 2)*(y2 - y1)));
         }
     }
-    return;
+    this->setVisible(true);
+    this->ChangePos(this->xv, this->yv);
+    //setPos(mapToParent(this->pos_x, this->pos_y));
+    setPos(mapToParent(this->xv, this->yv));
+    //std::cout << "x: " << this->pos_x << " y:" << this->pos_y << std::endl;
+
 }

@@ -2,22 +2,30 @@
 #define WINDOW_H
 
 #include <QWidget>
+#include <QTimer>
+#include <QGraphicsScene>
 #include <vector>
+#include <QPushButton>
+#include <QMouseEvent>
+#include <QtWidgets>
+
+#include <iostream>
 
 class Window : public QWidget
 {
     Q_OBJECT
     public:
         explicit Window(QWidget *parent = 0);
-        std::vector<BodyClass> bodies;
     private:
-        RenderArea *renderArea;
+        QTimer *timer;
+        QGraphicsView *view;
+        QGraphicsScene *scene;
         QPushButton *plusButton;
         QPushButton *minusButton;
     signals:
 
     public slots:
-       void BodyClass createBody(std::pair<int, int>);
+       void createBody(int, int);
 
 };
 
